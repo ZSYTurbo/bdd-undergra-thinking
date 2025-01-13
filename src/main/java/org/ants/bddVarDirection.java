@@ -190,7 +190,7 @@ public class bddVarDirection {
 
         long endTime = System.nanoTime();
 
-        // TODO: add your benchmark
+        // benchmark
         System.out.println("total run time: " + (endTime - startTime));
         System.out.println("bdd node mk count: " + NodeTable.mkCount);
     }
