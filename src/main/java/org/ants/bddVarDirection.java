@@ -12,7 +12,7 @@ public class bddVarDirection {
     static final int BDD_NODE_TABLE_SIZE = 10000;
     static final int BDD_CACHE_SIZE = 1000;
 
-    private static BDD bddEngine;
+    private static BDD bddEngine = new BDD(BDD_NODE_TABLE_SIZE, BDD_CACHE_SIZE);;
     private static int[] bdds = new int[IP_LENGTH];
     private static int[] nbdds = new int[IP_LENGTH];
 
@@ -54,7 +54,6 @@ public class bddVarDirection {
             // convert string to int
             int partedIP = Integer.parseInt(ipSet[i]);
             int2BitSet(partedIP, bitSet, i);
-//            bitSet.set(i);
         }
 
         return bitSet;
@@ -62,13 +61,16 @@ public class bddVarDirection {
 
     /**
      * Test for the direction when creating BDD variables
-     * positive order [x0, x1, x2, x3] / reverse order [x3, x2, x1, x0]
-     * @param reverse True if from right to left
+     *  - positive order [x0, x1, x2, x3]
+     *  - reverse order  [x3, x2, x1, x0]
+     * @param reverse false(default) / true
      */
     private static void createVarWithDirection(boolean reverse) {
         for (int i = 0; i < IP_LENGTH; i++) {
             int idx = i;
-            if (reverse) {
+            // TODO: problem 1
+//            if (!reverse) {
+            if (reverse) { // default
                 idx = IP_LENGTH - i - 1;
             }
             bdds[idx] = bddEngine.createVar();
@@ -79,20 +81,22 @@ public class bddVarDirection {
     /**
      * construct ip bdd from bitset
      * create order - construct order
-     *  * pos-rev x3 ^ -x2 ^ -x1 ^ -x0
-     *  * rev-rev x0 ^ -x1 ^ -x2 ^ -x3
-     *  * pos-pos -x0 ^ -x1 ^ -x2 ^ x3
-     *  * rev-pos -x3 ^ -x2 ^ -x1 ^ x0
+     *  - pos-rev  x3 ^ -x2 ^ -x1 ^ -x0
+     *  - rev-rev  x0 ^ -x1 ^ -x2 ^ -x3
+     *  - pos-pos -x0 ^ -x1 ^ -x2 ^ x3
+     *  - rev-pos -x3 ^ -x2 ^ -x1 ^ x0
      * @param ip ip address binary bitset
-     * @param bdds initialized bdd list
+     * @param reverse true(default) / false
      * @return constructed ip bdd
      */
-    private static int constructBDDWithDirection(BitSet ip, int[] bdds, boolean reverse) {
+    private static int constructBDDWithDirection(BitSet ip, boolean reverse) {
         int ipBDD = 1;
 
         for (int i = IP_LENGTH - 1; i >= 0; i--) {
             int idx = i;
-            if (!reverse) {
+            // TODO: problem 2
+//            if (reverse) {
+            if (!reverse) { // default
                 idx = IP_LENGTH - i - 1;
             }
             int ipBit = ip.get(idx) ? bdds[idx] : nbdds[idx];
@@ -102,16 +106,41 @@ public class bddVarDirection {
         return ipBDD;
     }
 
-    // 多个ip or, ip长度不同
-    // 12 T1, 13 T2
+    /**
+     * IP constructor wrapper
+     * @param ip ip address string with decimal separator
+     * @param problemNumber
+     *  - 1: pos-rev or rev-rev
+     *  - 2: pos-rev or pos-pos
+     * @return constructed ip bdd
+     */
+    private static int constructIP(String ip, int problemNumber) {
+        BitSet ipBitSet = IP2BitSet(ip);
+
+        boolean flag = problemNumber == 1;
+        createVarWithDirection(flag);
+
+        return constructBDDWithDirection(ipBitSet, flag);
+    }
+
+    /**
+     * benchmark
+     * multi ip address with different length
+     */
     public static void main(String[] args) {
-        String testIP = "192.168.31.1"; // 0.0.0.1
-        BitSet ipSet = IP2BitSet(testIP); // {3}
 
-        bddEngine = new BDD(BDD_NODE_TABLE_SIZE, BDD_CACHE_SIZE);
-        createVarWithDirection(true);
+        // TODO: choose your problem number
+        final int PROBLEM_NUMBER = 1;
+//        final int PROBLEM_NUMBER = 2;
 
-        int ip = constructBDDWithDirection(ipSet, bdds, true);
-        System.out.println(bddEngine.satCount(ip));
+        String ip1 = "192.168.31.1";
+        int ip_1 = constructIP(ip1, PROBLEM_NUMBER);
+
+        String ip2 = "10.0.0.3";
+        int ip_2 = constructIP(ip2, PROBLEM_NUMBER);
+
+        int ip_group = bddEngine.or(ip_1, ip_2);
+
+        // TODO: add your benchmark
     }
 }
