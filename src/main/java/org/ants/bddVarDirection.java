@@ -1,7 +1,10 @@
 package org.ants;
 
 import jdd.bdd.BDD;
+import jdd.bdd.NodeTable;
 
+import java.io.*;
+import java.util.ArrayList;
 import java.util.BitSet;
 
 public class bddVarDirection {
@@ -9,12 +12,14 @@ public class bddVarDirection {
     static final int IP_LENGTH = 32;
     static final int IP_PART_LENGTH = 8;
 
-    static final int BDD_NODE_TABLE_SIZE = 10000;
-    static final int BDD_CACHE_SIZE = 1000;
+    static final int BDD_NODE_TABLE_SIZE = 1000000;
+    static final int BDD_CACHE_SIZE = 10000;
 
     private static BDD bddEngine = new BDD(BDD_NODE_TABLE_SIZE, BDD_CACHE_SIZE);;
     private static int[] bdds = new int[IP_LENGTH];
     private static int[] nbdds = new int[IP_LENGTH];
+
+    private static ArrayList<String> IPs = new ArrayList<>();
 
     private static boolean IPnotValid(String[] ipSet) {
         return false;
@@ -124,6 +129,46 @@ public class bddVarDirection {
     }
 
     /**
+     * Read file content from path
+     *
+     * @param fileInPath
+     * @throws IOException
+     */
+    public static void getFileContent(Object fileInPath) throws IOException {
+        BufferedReader br = null;
+        if (fileInPath == null) {
+            return;
+        }
+        if (fileInPath instanceof String) {
+            br = new BufferedReader(new FileReader(new File((String) fileInPath)));
+        } else if (fileInPath instanceof InputStream) {
+            br = new BufferedReader(new InputStreamReader((InputStream) fileInPath));
+        }
+        String line;
+        while ((line = br.readLine()) != null) {
+            IPs.add(line);
+//            System.out.println(line);
+        }
+        br.close();
+    }
+
+    /**
+     * read ip addresses from src/main/resources/ips
+     */
+    private static void readIPs() {
+        String filename = "ips";
+        String path = bddVarDirection.class.getResource("").getPath();
+        String filePath = path + filename;
+
+        try {
+            getFileContent(filePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
+
+    /**
      * benchmark
      * multi ip address with different length
      */
@@ -133,14 +178,20 @@ public class bddVarDirection {
         final int PROBLEM_NUMBER = 1;
 //        final int PROBLEM_NUMBER = 2;
 
-        String ip1 = "192.168.31.1";
-        int ip_1 = constructIP(ip1, PROBLEM_NUMBER);
+        readIPs();
 
-        String ip2 = "10.0.0.3";
-        int ip_2 = constructIP(ip2, PROBLEM_NUMBER);
+        long startTime = System.nanoTime();
 
-        int ip_group = bddEngine.or(ip_1, ip_2);
+        int ipGroup = 0;
+        for (String ip : IPs) {
+            int ipBDD = constructIP(ip, PROBLEM_NUMBER);
+            ipGroup = bddEngine.or(ipBDD, ipGroup);
+        }
+
+        long endTime = System.nanoTime();
 
         // TODO: add your benchmark
+        System.out.println("total run time: " + (endTime - startTime));
+        System.out.println("bdd node mk count: " + NodeTable.mkCount);
     }
 }
