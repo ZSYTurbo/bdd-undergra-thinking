@@ -1,11 +1,10 @@
 package org.ants;
 
 import jdd.bdd.BDD;
-import jdd.examples.Simple2;
 
 import java.util.BitSet;
 
-public class createVarDirection {
+public class bddVarDirection {
 
     static final int IP_LENGTH = 32;
     static final int IP_PART_LENGTH = 8;
@@ -63,7 +62,7 @@ public class createVarDirection {
 
     /**
      * Test for the direction when creating BDD variables
-     * 正 [x0, x1, x2, x3] / 反 [x3, x2, x1, x0]
+     * positive order [x0, x1, x2, x3] / reverse order [x3, x2, x1, x0]
      * @param reverse True if from right to left
      */
     private static void createVarWithDirection(boolean reverse) {
@@ -79,16 +78,25 @@ public class createVarDirection {
 
     /**
      * construct ip bdd from bitset
+     * create order - construct order
+     *  * pos-rev x3 ^ -x2 ^ -x1 ^ -x0
+     *  * rev-rev x0 ^ -x1 ^ -x2 ^ -x3
+     *  * pos-pos -x0 ^ -x1 ^ -x2 ^ x3
+     *  * rev-pos -x3 ^ -x2 ^ -x1 ^ x0
      * @param ip ip address binary bitset
      * @param bdds initialized bdd list
      * @return constructed ip bdd
      */
-    private static int constructBDD(BitSet ip, int[] bdds) {
+    private static int constructBDDWithDirection(BitSet ip, int[] bdds, boolean reverse) {
         int ipBDD = 1;
 
         for (int i = IP_LENGTH - 1; i >= 0; i--) {
-            int ipBit = ip.get(i) ? bdds[i] : nbdds[i];
-            ipBDD = bddEngine.and(ipBDD, ipBit); // 正反 x3 ^ -x2 ^ -x1 ^ -x0 / 反反 x0 ^ -x1 ^ -x2 ^ -x3 / 正正 -x0 ^ -x1 ^ -x2 ^ x3 / 反正 -x3 ^ -x2 ^ -x1 ^ x0
+            int idx = i;
+            if (!reverse) {
+                idx = IP_LENGTH - i - 1;
+            }
+            int ipBit = ip.get(idx) ? bdds[idx] : nbdds[idx];
+            ipBDD = bddEngine.and(ipBDD, ipBit);
         }
 
         return ipBDD;
@@ -101,9 +109,9 @@ public class createVarDirection {
         BitSet ipSet = IP2BitSet(testIP); // {3}
 
         bddEngine = new BDD(BDD_NODE_TABLE_SIZE, BDD_CACHE_SIZE);
-        createVarWithDirection(true);;
+        createVarWithDirection(true);
 
-        int ip = constructBDD(ipSet, bdds);
+        int ip = constructBDDWithDirection(ipSet, bdds, true);
         System.out.println(bddEngine.satCount(ip));
     }
 }

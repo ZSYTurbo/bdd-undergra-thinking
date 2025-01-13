@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.example</groupId>
+    <groupId>org.ants</groupId>
     <artifactId>undergra-thinking</artifactId>
     <version>1.0-SNAPSHOT</version>
 
@@ -13,5 +13,29 @@
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-    
+
+    <repositories>
+        <repository>
+            <id>mvnrepository</id>
+            <name>mvn repository</name>
+            <url>https://mvnrepository.com/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <dependencies>
+    <dependency>
+        <groupId>org.ants</groupId>
+        <artifactId>jdd</artifactId>
+        <version>111</version>
+        <scope>system</scope>
+        <systemPath>${project.basedir}/lib/jdd-111.jar</systemPath>
+    </dependency>
+    </dependencies>
+
 </project>
