@@ -21,21 +21,20 @@ public class bddVarDirection {
 
     private static ArrayList<String> IPs = new ArrayList<>();
 
-    private static boolean IPnotValid(String[] ipSet) {
+    private static boolean IPnotValid(String ip) {
         return false;
     }
 
     /**
      * 31 (16 + 8 + 4 + 2 + 1) -> 0001 1111 -> [0, 0, 0, 1, 1, 1, 1, 1]
      * @param i 192 168 31 1
-     * @param bitset append 8 bit
-     * @param part offset in bitset
+     * @param bitset binary list
+     * @param offset length of bitset
      */
-    private static void int2BitSet(int i, BitSet bitset, int part) {
-        int offset = (part + 1) * IP_PART_LENGTH - 1;
+    private static void int2BitSet(int i, BitSet bitset, int offset) {
         for (int j = 0; j < IP_PART_LENGTH; j++) {
             if ((i & 1) == 1) {
-                bitset.set(offset - j);
+                bitset.set(offset + IP_PART_LENGTH - j);
             }
             i >>= 1;
         }
@@ -43,25 +42,20 @@ public class bddVarDirection {
 
     /**
      * Convert from ip string to a binary bitset
+     * Split ip and mask
      * @param ip String 192.168.31.1
      * @return BitSet
      */
-    private static BitSet IP2BitSet(String ip) {
+    public static BitSet IP2BitSet(String ip) {
+        BitSet bits = new BitSet(IP_LENGTH);
+
         String[] ipSet = ip.split("\\.");
-
-        if (IPnotValid(ipSet)) {
-            return null;
-        }
-
-        BitSet bitSet = new BitSet(IP_LENGTH);
-
         for (int i = 0; i < ipSet.length; i++) {
-            // convert string to int
-            int partedIP = Integer.parseInt(ipSet[i]);
-            int2BitSet(partedIP, bitSet, i);
+            int ipInt = Integer.parseInt(ipSet[i]);
+            int2BitSet(ipInt, bits, i * IP_PART_LENGTH);
         }
 
-        return bitSet;
+        return bits;
     }
 
     /**
@@ -91,18 +85,19 @@ public class bddVarDirection {
      *  - pos-pos -x0 ^ -x1 ^ -x2 ^ x3
      *  - rev-pos -x3 ^ -x2 ^ -x1 ^ x0
      * @param ip ip address binary bitset
+     * @param mask
      * @param reverse true(default) / false
      * @return constructed ip bdd
      */
-    private static int constructBDDWithDirection(BitSet ip, boolean reverse) {
+    private static int constructBDDWithDirection(BitSet ip, int mask, boolean reverse) {
         int ipBDD = 1;
 
-        for (int i = IP_LENGTH - 1; i >= 0; i--) {
+        for (int i = mask - 1; i >= 0; i--) {
             int idx = i;
             // TODO: problem 2
 //            if (reverse) {
             if (!reverse) { // default
-                idx = IP_LENGTH - i - 1;
+                idx = mask - i - 1;
             }
             int ipBit = ip.get(idx) ? bdds[idx] : nbdds[idx];
             ipBDD = bddEngine.and(ipBDD, ipBit);
@@ -120,12 +115,17 @@ public class bddVarDirection {
      * @return constructed ip bdd
      */
     private static int constructIP(String ip, int problemNumber) {
+        if (IPnotValid(ip)) {
+            return 0;
+        }
+
+        String[] ipAndMask = ip.split("/");
+        int mask = Integer.parseInt(ipAndMask[1]);
+        ip = ipAndMask[0];
+
         BitSet ipBitSet = IP2BitSet(ip);
 
-        boolean flag = problemNumber == 1;
-        createVarWithDirection(flag);
-
-        return constructBDDWithDirection(ipBitSet, flag);
+        return constructBDDWithDirection(ipBitSet, mask, problemNumber == 1);
     }
 
     /**
@@ -177,6 +177,8 @@ public class bddVarDirection {
         // TODO: choose your problem number
         final int PROBLEM_NUMBER = 1;
 //        final int PROBLEM_NUMBER = 2;
+
+        createVarWithDirection(PROBLEM_NUMBER == 1);
 
         readIPs();
 
