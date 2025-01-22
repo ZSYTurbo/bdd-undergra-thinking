@@ -68,8 +68,8 @@ public class bddVarDirection {
         for (int i = 0; i < IP_LENGTH; i++) {
             int idx = i;
             // TODO: problem 1
-//            if (!reverse) {
-            if (reverse) { // default
+           if (!reverse) {
+            // if (reverse) { // default
                 idx = IP_LENGTH - i - 1;
             }
             bdds[idx] = bddEngine.createVar();
@@ -96,7 +96,7 @@ public class bddVarDirection {
             int idx = i;
             // TODO: problem 2
            if (reverse) {
-            // if (!reverse) { // default
+            //  if (!reverse) { // default
                 idx = mask - i - 1;
             }
             int ipBit = ip.get(idx) ? bdds[idx] : nbdds[idx];
@@ -176,18 +176,22 @@ public class bddVarDirection {
 
         // TODO: choose your problem number
         // final int PROBLEM_NUMBER = 1;
-        final int PROBLEM_NUMBER = 2;
+        final int PROBLEM_NUMBER = 1;
 
         createVarWithDirection(PROBLEM_NUMBER == 1);
 
         readIPs();
 
         long startTime = System.nanoTime();
+        int cnt = 0, cnt2 = 100;
         int ipGroup = 0;
         for (String ip : IPs) {
+            cnt++;
+            //if(cnt<cnt2) continue;
             int ipBDD = constructIP(ip, PROBLEM_NUMBER);
             ipGroup = bddEngine.or(ipBDD, ipGroup);
-            
+            //bddEngine.printDot(String.valueOf(cnt), ipBDD);
+           //if(cnt>cnt2+2) break;
         }
         long endTime = System.nanoTime();
         //bddEngine.printDot("prt", ipGroup);
