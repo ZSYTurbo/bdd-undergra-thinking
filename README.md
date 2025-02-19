@@ -32,8 +32,6 @@ The mkcount of constructing 1000 IPs  forward and reverse. Total run time is rou
 
 ## Why
 
-# 
-
 #### #2 Construct
 
 When create variables in the same order, constructing the bdd in the opposite order of creating brings less mkcount. The reason is related to the  inner order of operation "and". (For both reverse and forward, the final bdd of a single IP is the same due to we have same createvar order, so the "or" opreation of different bdd for both situation should be the same, so we can just talk about "and")
