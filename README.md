@@ -32,11 +32,7 @@ The mkcount of constructing 1000 IPs  forward and reverse. Total run time is rou
 
 ## Why
 
-#### #1 Create
-
-If the IPs are totally random, then creating variables in different order shouldn't be that different, at least for creating each IP's bdd, the mkcount should be similar. The problem may be caused by subnet mask, it masks some nodes of ip, so that they don't all have 32 nodes. In the "and" operation it doesn't cause any huge difference, but when different IP bdd  "or" together, wrong create order may bring unnecessary mk operation. 
-
-For creating variables forward, it's like "1, 2 ,3, ..., 31, 32", because of subnet mask, some IPs only have like "1, 2, ..., 19, 20". When the two bdd "or" together, they recursively go to 20 and the second one gets its terminal, so the recusion stops here, only 20 levels. But creating reverse is like "32, 31, ..., 2, 1" and "20, 19, ..., 2, 1", the "or" operation starts at the lowest var (which is 32), and completely goes 32 levels of recursion. We can see in reverse order the process from 32 to 21 is unnecessary, when it comes to more IPs with different length, the watse would be even more.
+# 
 
 #### #2 Construct
 
