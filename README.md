@@ -39,7 +39,7 @@ Some IP addresses are 16 bits, while others are 32 bits. If the IP address is on
 
 When performing an OR operation on all IP addresses, a forward-encoded BDD will directly reach the terminal after recursing to x15. If the result is already 1 (for an OR operation, 1 OR any value is 1), the recursion will not continue. However, in reverse encoding, for a 16-bit IP address, only bits starting from x16 are valid. Therefore, when performing an OR operation between a 32-bit and a 16-bit IP address, the recursion will start from x0 for the 32-bit IP address and only become valid for the 16-bit IP address when it reaches x16. This wastes a significant amount of recursion time, leading to differences in time overhead.
 
-For more details, you can see pthe pdf in the supplement.
+For more details, you can see the pdf in the supplement.
 
 #### #2 Construct
 
